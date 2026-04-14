@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/api";
+// ❗ If build fails, comment next line
 import bgImage from "../assets/bg.jpg";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+
   const [boards, setBoards] = useState([]);
   const [newBoard, setNewBoard] = useState("");
 
-  // ✅ GET TOKEN
+  // ✅ TOKEN
   const token = localStorage.getItem("token");
 
   // ✅ LOGOUT
@@ -17,25 +19,25 @@ export default function Dashboard() {
     navigate("/");
   };
 
-  useEffect(() => {
-    fetchBoards();
-  }, []);
-
-  // ✅ FETCH BOARDS (FIXED API + AUTH HEADER)
+  // ✅ FETCH BOARDS
   const fetchBoards = async () => {
     try {
       const res = await API.get("/api/boards", {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
-      setBoards(res.data);
+      setBoards(res.data || []);
     } catch (err) {
-      console.error(err);
+      console.error("Fetch boards error:", err);
     }
   };
 
-  // ✅ ADD BOARD (FIXED)
+  useEffect(() => {
+    fetchBoards();
+  }, []);
+
+  // ✅ ADD BOARD
   const addBoard = async () => {
     if (!newBoard.trim()) return;
 
@@ -45,30 +47,30 @@ export default function Dashboard() {
         { title: newBoard },
         {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
       setNewBoard("");
       fetchBoards();
     } catch (err) {
-      console.error(err);
+      console.error("Add board error:", err);
     }
   };
 
-  // ✅ DELETE BOARD (FIXED)
+  // ✅ DELETE BOARD
   const deleteBoard = async (id) => {
     try {
       await API.delete(`/api/boards/${id}`, {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       fetchBoards();
     } catch (err) {
-      console.error(err);
+      console.error("Delete board error:", err);
     }
   };
 
@@ -76,7 +78,8 @@ export default function Dashboard() {
     <div
       className="min-h-screen p-8 bg-cover bg-center"
       style={{
-        backgroundImage: `url(${bgImage})`,
+        // ✅ Safe fallback if image fails
+        backgroundImage: bgImage ? `url(${bgImage})` : "none",
       }}
     >
       {/* HEADER */}
@@ -112,26 +115,30 @@ export default function Dashboard() {
 
       {/* BOARD LIST */}
       <div className="grid grid-cols-3 gap-6">
-        {boards.map((board) => (
-          <div
-            key={board._id}
-            className="bg-white/10 backdrop-blur-lg p-6 rounded-2xl relative cursor-pointer hover:scale-105 transition"
-          >
-            <h2
-              onClick={() => navigate(`/board/${board._id}`)}
-              className="text-white"
+        {boards.length > 0 ? (
+          boards.map((board) => (
+            <div
+              key={board._id}
+              className="bg-white/10 backdrop-blur-lg p-6 rounded-2xl relative cursor-pointer hover:scale-105 transition"
             >
-              {board.title}
-            </h2>
+              <h2
+                onClick={() => navigate(`/board/${board._id}`)}
+                className="text-white"
+              >
+                {board.title}
+              </h2>
 
-            <button
-              onClick={() => deleteBoard(board._id)}
-              className="absolute top-2 right-2 text-red-400"
-            >
-              ✕
-            </button>
-          </div>
-        ))}
+              <button
+                onClick={() => deleteBoard(board._id)}
+                className="absolute top-2 right-2 text-red-400"
+              >
+                ✕
+              </button>
+            </div>
+          ))
+        ) : (
+          <p className="text-white">No boards found</p>
+        )}
       </div>
     </div>
   );
