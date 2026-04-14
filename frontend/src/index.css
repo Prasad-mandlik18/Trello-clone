@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ⚡ ELECTRIC BORDER */
+.electric-border {
+  position: relative;
+  border-radius: 16px;
+  padding: 2px;
+  overflow: hidden;
+}
+
+.electric-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 2px;
+  background: linear-gradient(
+    120deg,
+    #00f0ff,
+    #7a5cff,
+    #ff00ff,
+    #00f0ff
+  );
+  background-size: 300% 300%;
+  animation: electricMove 3s linear infinite;
+  z-index: 0;
+}
+
+/* inner card */
+.electric-inner {
+  position: relative;
+  background: rgba(20, 20, 30, 0.95);
+  border-radius: 14px;
+  padding: 2rem;
+  z-index: 1;
+}
+
+/* animation */
+@keyframes electricMove {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+/* glow effect */
+.electric-border::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  background: radial-gradient(circle, #00f0ff33, transparent 70%);
+  filter: blur(20px);
+  z-index: 0;
+}
